@@ -18,7 +18,8 @@ PREDEFINOVANE_FIRMY = {
     "3": {"nazov": os.getenv("FIRMA_3_NAZOV"), "iban": os.getenv("FIRMA_3_IBAN")},
 }
 # Vyčistíme firmy, ktoré sa nenačítali (ak by .env chýbal)
-PREDEFINOVANE_FIRMY = {k: v for k, v in PREDEFINOVANE_FIRMY.items() if v['iban']}MAX_SUMA_NA_QR = 1000.00
+PREDEFINOVANE_FIRMY = {k: v for k, v in PREDEFINOVANE_FIRMY.items() if v['iban']}
+MAX_SUMA_NA_QR = 1000.00
 
 # --- FUNKCIE ---
 
