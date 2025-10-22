@@ -1,0 +1,59 @@
+# Názov tohto "pipeline"
+name: Vytvoriť Release pre Windows
+
+# Kedy sa má spustiť:
+on:
+  push:
+    tags:
+      - 'v*' # Spustí sa vždy, keď pushnete tag začínajúci na "v" (napr. v1.1, v1.2)
+
+jobs:
+  build-and-release:
+    # Povieme GitHubu, aby použil virtuálny stroj s Windows
+    runs-on: windows-latest
+
+    steps:
+      # Krok 1: Stiahne si váš kód (napr. main.py, assets, atď.)
+      - name: Stiahnuť kód
+        uses: actions/checkout@v3
+
+      # Krok 2: Nastaví prostredie Python
+      - name: Nastaviť Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' # Môžete zvoliť vašu verziu Pythonu
+
+      # Krok 3: Nainštaluje všetky knižnice (reportlab, pyinstaller...)
+      - name: Inštalovať závislosti
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller # Nainštalujeme pyinstaller
+
+      # Krok 4: Zostaví .exe súbor (presne ako na vašom PC)
+      - name: Zostaviť .exe (PyInstaller)
+        run: |
+          python -m PyInstaller --onefile --add-data "assets/arial.ttf;assets" --icon="assets/logo.ico" src/main.py
+
+      # Krok 5: Vytvorí nový "Release" na GitHube
+      - name: Vytvoriť Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }} # Názov tagu (napr. v1.1)
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      # Krok 6: Nahrá .exe súbor do toho nového Release
+      - name: Nahrať .exe do Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/main.exe # Cesta k vášmu .exe
+          asset_name: moj_qr_generator.exe # Názov, pod akým sa súbor nahrá
+          asset_content_type: application/vnd.microsoft.portable-executable

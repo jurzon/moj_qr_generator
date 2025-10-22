@@ -6,9 +6,18 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 import qrcode
-from dotenv import load_dotenv # <-- PRIDAŤ TENTO IMPORT
+from dotenv import load_dotenv
 
-load_dotenv() # <-- PRIDAŤ TENTO RIADOK (načíta .env)
+load_dotenv()
+
+# --- ANSI NASTAVENIA PRE SPRAVY ---
+ANSI_CYAN = "\033[96m"
+ANSI_YELLOW = "\033[93m"
+ANSI_BOLD = "\033[1m"
+ANSI_BLUE = "\033[94m"    # <-- DOPLNENÉ
+ANSI_RED = "\033[91m"     # <-- DOPLNENÉ
+ANSI_GREEN = "\033[92m"   # <-- DOPLNENÉ
+ANSI_END = "\033[0m"
 
 # --- NASTAVENIA ---
 # Dáta sa teraz načítajú z .env súboru, nie sú v kóde
@@ -55,7 +64,9 @@ def vytvor_pdf_dokument(zakladne_info, zoznam_platieb):
 
         # 1. Kreslenie QR kódu (vľavo)
         velkost_qr = 40 * mm
-        qr_obr = ImageReader(platba['subor_qr'])
+        # Ak by si chcel použiť logo, musíš ho najprv prekonvertovať na vhodný formát (napr. PNG) a použiť ImageReader, zatiaľ bez loga.
+        # qr_obr = ImageReader(platba['subor_qr']) 
+        qr_obr = platba['subor_qr']
         c.drawImage(qr_obr, lavy_okraj, vrch_bloku_y - velkost_qr - (5*mm), width=velkost_qr, height=velkost_qr)
 
         # 2. Kreslenie textových informácií (v strede)
@@ -92,39 +103,39 @@ def vytvor_pdf_dokument(zakladne_info, zoznam_platieb):
         pozicia_y -= vyska_bloku_platby
 
     c.save()
-    print("\n----------------------------------------------------")
-    print(f"✅ PDF súbor '{vystupny_subor}' bol úspešne vygenerovaný!")
+    print(f"\n{ANSI_BOLD}----------------------------------------------------{ANSI_END}")
+    print(f"✅ {ANSI_GREEN}PDF súbor '{vystupny_subor}' bol úspešne vygenerovaný!{ANSI_END}")
     print(f"   Súbor: {os.path.abspath(vystupny_subor)}")
-    print("----------------------------------------------------")
+    print(f"{ANSI_BOLD}----------------------------------------------------{ANSI_END}")
 
 
 def ziskaj_vstup_od_uzivatela():
     """Získa všetky potrebné údaje od používateľa."""
-    print("Prosím, vyberte firmu, ktorej chcete zaplatiť:")
+    print(f"\n{ANSI_BOLD}Prosím, vyberte firmu, ktorej chcete zaplatiť:{ANSI_END}")
     for key, value in PREDEFINOVANE_FIRMY.items():
-        print(f"  [{key}]: {value['nazov']} ({value['iban']})")
+        print(f"  [{ANSI_CYAN}{key}{ANSI_END}]: {value['nazov']} ({value['iban']})")
     
     while True:
-        vyber = input(f"Zadajte číslo (1-{len(PREDEFINOVANE_FIRMY)}): ")
+        vyber = input(f"Zadajte číslo ({ANSI_CYAN}1-{len(PREDEFINOVANE_FIRMY)}{ANSI_END}): ")
         if vyber in PREDEFINOVANE_FIRMY:
             firma = PREDEFINOVANE_FIRMY[vyber]
             break
         else:
-            print("❌ Neplatný výber, skúste to znova.")
+            print(f"❌ {ANSI_RED}Neplatný výber, skúste to znova.{ANSI_END}")
 
     while True:
         try:
-            suma_str = input("Zadajte CELKOVÚ sumu na úhradu (napr. 5562.00): ").replace(',', '.')
+            suma_str = input(f"Zadajte CELKOVÚ sumu na úhradu ({ANSI_YELLOW}napr. 5562.00{ANSI_END}): ").replace(',', '.')
             suma = float(suma_str)
             if suma <= 0:
                 raise ValueError("Suma musí byť kladné číslo.")
             break
         except ValueError as e:
-            print(f"❌ Neplatná suma. {e}")
+            print(f"❌ {ANSI_RED}Neplatná suma. {e}{ANSI_END}")
 
-    vs = input("Zadajte variabilný symbol (max 10 číslic): ")
-    ks = input("Zadajte konštantný symbol (nepovinné, max 4 číslice): ")
-    povodna_poznamka = input("Zadajte poznámku pre príjemcu (nepovinné): ")
+    vs = input(f"Zadajte {ANSI_YELLOW}variabilný symbol{ANSI_END} (max 10 číslic): ")
+    ks = input(f"Zadajte {ANSI_YELLOW}konštantný symbol{ANSI_END} (nepovinné, max 4 číslice): ")
+    povodna_poznamka = input(f"Zadajte {ANSI_YELLOW}poznámku pre príjemcu{ANSI_END} (nepovinné): ")
     
     return {
         "prijemca": firma['nazov'],
@@ -137,7 +148,14 @@ def ziskaj_vstup_od_uzivatela():
 
 # --- HLAVNÁ ČASŤ PROGRAMU ---
 if __name__ == "__main__":
-    print("--- Generátor Pay BY Square QR kódu do PDF (s delením platby) ---")
+    
+    # ANSI grafika pre spestrenie
+    print(f"""
+{ANSI_CYAN}{ANSI_BOLD}█████{ANSI_END} {ANSI_BOLD}PAY BY SQUARE QR GENERATOR (SK){ANSI_END}
+{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_END} --- Automatické delenie platieb nad {MAX_SUMA_NA_QR:.2f}€ ---
+{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_END}
+{ANSI_CYAN}{ANSI_BOLD}█████{ANSI_END}
+""")
     
     info_platby = ziskaj_vstup_od_uzivatela()
     celkova_suma = info_platby["celkova_suma"]
@@ -145,7 +163,8 @@ if __name__ == "__main__":
     ciastocne_sumy = []
     if celkova_suma > MAX_SUMA_NA_QR:
         pocet_plnych_platieb = int(celkova_suma / MAX_SUMA_NA_QR)
-        zostatok = round(celkova_suma % MAX_SUMA_NA_QR, 2)
+        # Použitie math.fmod pre presnejší zvyšok pre float
+        zostatok = round(math.fmod(celkova_suma, MAX_SUMA_NA_QR), 2)
         
         for _ in range(pocet_plnych_platieb):
             ciastocne_sumy.append(MAX_SUMA_NA_QR)
@@ -153,7 +172,7 @@ if __name__ == "__main__":
         if zostatok > 0:
             ciastocne_sumy.append(zostatok)
         
-        print(f"\nINFO: Celková suma {celkova_suma:.2f} EUR bude rozdelená na {len(ciastocne_sumy)} platieb.")
+        print(f"\n{ANSI_BLUE}INFO:{ANSI_END} Celková suma {ANSI_YELLOW}{celkova_suma:.2f} EUR{ANSI_END} bude rozdelená na {ANSI_YELLOW}{len(ciastocne_sumy)} platieb{ANSI_END}.")
     else:
         ciastocne_sumy.append(celkova_suma)
 
@@ -168,6 +187,7 @@ if __name__ == "__main__":
             dodatok_poznamky = f"(Platba {poradie}/{celkovy_pocet_platieb})"
             poznamka = f"{dodatok_poznamky} {poznamka}".strip()
 
+        # Generovanie Pay By Square dátového reťazca
         payload = pay_by_square.generate(
             iban=info_platby['iban'],
             amount=suma,
@@ -177,18 +197,25 @@ if __name__ == "__main__":
             beneficiary_name=info_platby['prijemca']
         )
         
-        subor_qr = f"temp_qr_{poradie}.png"
+        # Dočasné uloženie QR kódu ako súboru
+        subor_qr = f"temp_qr_vs{info_platby['vs']}_{poradie}.png"
         vygeneruj_qr_kod(payload, subor_qr)
         
         zoznam_vygenerovanych_platieb.append({
             'suma': suma,
-            'subor_qr': subor_qr,
+            # Poznámka: reportlab preferuje ImageReader, tak si ho pripravíme vopred
+            'subor_qr': ImageReader(subor_qr),
             'poradie': poradie,
-            'celkovy_pocet': celkovy_pocet_platieb
+            'celkovy_pocet': celkovy_pocet_platieb,
+            'docasny_subor': subor_qr # Uchováme pre neskoršie zmazanie
         })
 
     if zoznam_vygenerovanych_platieb:
         vytvor_pdf_dokument(info_platby, zoznam_vygenerovanych_platieb)
 
+        # Vyčistenie dočasných QR kódov (PNG súbory)
         for platba in zoznam_vygenerovanych_platieb:
-            os.remove(platba['subor_qr'])
+            try:
+                os.remove(platba['docasny_subor'])
+            except OSError as e:
+                print(f"{ANSI_RED}Upozornenie: Nepodarilo sa zmazať dočasný súbor {platba['docasny_subor']}. {e}{ANSI_END}")
