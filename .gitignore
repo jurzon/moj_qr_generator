@@ -24,6 +24,7 @@ __pycache__/
 *.png
 *.pdf
 *.jpg
+*.txt
 
 # 6. Súbory s lokálnymi nastaveniami alebo heslami (ak by ste mali)
 .env
