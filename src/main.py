@@ -6,15 +6,19 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 import qrcode
+from dotenv import load_dotenv # <-- PRIDAŤ TENTO IMPORT
+
+load_dotenv() # <-- PRIDAŤ TENTO RIADOK (načíta .env)
 
 # --- NASTAVENIA ---
-# TODO: Upravte si zoznam firiem a ich IBAN účty podľa potreby
+# Dáta sa teraz načítajú z .env súboru, nie sú v kóde
 PREDEFINOVANE_FIRMY = {
-    "1": {"nazov": "***REMOVED***", "iban": "***REMOVED***"},
-    "2": {"nazov": "***REMOVED***", "iban": "***REMOVED***"},
-    "3": {"nazov": "***REMOVED***", "iban": "***REMOVED***"},
+    "1": {"nazov": os.getenv("FIRMA_1_NAZOV"), "iban": os.getenv("FIRMA_1_IBAN")},
+    "2": {"nazov": os.getenv("FIRMA_2_NAZOV"), "iban": os.getenv("FIRMA_2_IBAN")},
+    "3": {"nazov": os.getenv("FIRMA_3_NAZOV"), "iban": os.getenv("FIRMA_3_IBAN")},
 }
-MAX_SUMA_NA_QR = 1000.00
+# Vyčistíme firmy, ktoré sa nenačítali (ak by .env chýbal)
+PREDEFINOVANE_FIRMY = {k: v for k, v in PREDEFINOVANE_FIRMY.items() if v['iban']}MAX_SUMA_NA_QR = 1000.00
 
 # --- FUNKCIE ---
 
