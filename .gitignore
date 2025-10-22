@@ -1,0 +1,29 @@
+# 1. Virtuálne prostredie (venv)
+# Nikdy nenahrávať!
+/.venv/
+/venv/
+/env/
+
+# 2. Súbory vygenerované PyInstallerom
+# Tieto sa generujú z kódu, nepatria na GitHub.
+/dist/
+/build/
+*.spec
+
+# 3. Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# 4. Súbory IDE (nastavenia editora)
+.vscode/
+.idea/
+
+# 5. Vygenerované výstupy programu
+# Nechceme nahrávať QR kódy alebo PDF, ktoré program vytvoril.
+*.png
+*.pdf
+*.jpg
+
+# 6. Súbory s lokálnymi nastaveniami alebo heslami (ak by ste mali)
+.env
