@@ -28,3 +28,6 @@ __pycache__/
 
 # 6. Súbory s lokálnymi nastaveniami alebo heslami (ak by ste mali)
 .env
+
+# 7. Súbor s cestou k platobným partnerom
+config.json
