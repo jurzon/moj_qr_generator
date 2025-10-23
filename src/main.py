@@ -10,6 +10,7 @@ from reportlab.lib.utils import ImageReader
 import qrcode
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+import colorama
 
 # --- ANSI NASTAVENIA PRE SPRAVY ---
 ANSI_CYAN = "\033[96m"
@@ -396,15 +397,15 @@ def vyber_partnera_menu(partneri, aktualna_cesta):
 # --- HLAVNÁ ČASŤ PROGRAMU ---
 def main():
     """Hlavná logika a slučka programu."""
-    
+    colorama.init(autoreset=True) # <-- INICIALIZÁCIA S AUTORESETOM
     # ANSI grafika pre spestrenie
     print(f"""
 {ANSI_CYAN}{ANSI_BOLD}█████{ANSI_END} {ANSI_BOLD}PAY BY SQUARE QR GENERATOR (SK){ANSI_END}
 {ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_END} --- Automatické delenie platieb nad {MAX_SUMA_NA_QR:.2f}€ ---
 {ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_END}
-{ANSI_CYAN}{ANSI_BOLD}█████{ANSI_END}
+{ANSI_CYAN}{ANSI_BOLD}█████
 """)
-    
+    #{ANSI_END}
     vycisti_temp_priecinok() # Vyčistíme prípadné zvyšky z minulého behu
 
     cesta_suboru = nacitaj_cestu_k_partnerom()
