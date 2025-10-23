@@ -12,6 +12,11 @@ jobs:
     # Povieme GitHubu, aby použil virtuálny stroj s Windows
     runs-on: windows-latest
 
+    # === OPRÁVNENIA ===
+    permissions:
+      contents: write 
+    # ==================================
+
     steps:
       # Krok 1: Stiahne si váš kód (napr. main.py, assets, atď.)
       - name: Stiahnuť kód
