@@ -53,6 +53,7 @@ def nacitaj_partnerov_zo_suboru(cesta_k_suboru):
     """
     Načíta partnerov (názov, IBAN) z textového súboru.
     Automaticky skúsi viacero kódovaní (utf-8, cp1250, atď.).
+    Akceptuje rôzne SEPA IBAN formáty.
     """
     partneri = {}
     cislo_partnera = 1
@@ -99,13 +100,18 @@ def nacitaj_partnerov_zo_suboru(cesta_k_suboru):
             if len(casti) >= 2:
                 nazov = casti[0].strip()
                 iban = casti[1].strip().replace(" ", "") # Odstránime aj medzery z IBANu
-                if iban.startswith("SK") and len(iban) == 24:
+
+                # --- UPRAVENÁ KONTROLA ---
+                # Základná kontrola - musí obsahovať aspoň niečo a dĺžka je v rozumnom rozsahu pre IBAN
+                # Presnejšiu validáciu necháme na knižnicu pay_by_square
+                if iban and 15 <= len(iban) <= 34 and iban[:2].isalpha(): # IBAN zvyčajne začína 2 písmenami kódu krajiny
                     preferovany_nazov = casti[3].strip() if len(casti) > 3 and casti[3].strip() else nazov
                     if preferovany_nazov and iban:
                         partneri[str(cislo_partnera)] = {"nazov": preferovany_nazov, "iban": iban}
                         cislo_partnera += 1
                 else:
-                    print(f"⚠️ {ANSI_YELLOW}Varovanie: Riadok '{riadok[:30]}...' neobsahuje platný SK IBAN (po odstránení medzier), preskakuje sa.{ANSI_END}")
+                    print(f"⚠️ {ANSI_YELLOW}Varovanie: Riadok '{riadok[:30]}...' neobsahuje platný IBAN formát (po odstránení medzier), preskakuje sa.{ANSI_END}")
+                 # --- KONIEC UPRAVENEJ KONTROLY ---
             else:
                 print(f"⚠️ {ANSI_YELLOW}Varovanie: Riadok '{riadok[:30]}...' nemá očakávaný formát (chýba ';'), preskakuje sa.{ANSI_END}")
 
@@ -414,7 +420,7 @@ def spracuj_platbu(info_platby):
 
     except pay_by_square.exceptions.InvalidInput as e:
         print(f"❌ {ANSI_RED}Chyba pri generovaní PayBySquare dát: {e}{ANSI_END}")
-        print(f"   {ANSI_RED}Skontrolujte zadané údaje, najmä dĺžku poznámky alebo špeciálne znaky.{ANSI_END}")
+        print(f"   {ANSI_RED}Skontrolujte zadané údaje, najmä IBAN, dĺžku poznámky alebo špeciálne znaky.{ANSI_END}") # Upravené hlásenie
     except Exception as e:
         print(f"❌ {ANSI_RED}Vyskytla sa chyba pri generovaní QR/PDF: {e}{ANSI_END}")
     # finally pre vyčistenie je v hlavnej funkcii
@@ -469,7 +475,7 @@ def main():
     colorama.init(autoreset=True) # <-- INICIALIZÁCIA S AUTORESETOM
     # ANSI grafika pre spestrenie
     print(f"""
-{ANSI_CYAN}{ANSI_BOLD}█████{ANSI_END} {ANSI_BOLD}PAY BY SQUARE QR GENERATOR (SK){ANSI_END}
+{ANSI_CYAN}{ANSI_BOLD}█████{ANSI_END} {ANSI_BOLD}PAY BY SQUARE QR GENERATOR (SEPA){ANSI_END}
 {ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_END} --- Automatické delenie platieb nad {MAX_SUMA_NA_QR:.2f}€ ---
 {ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_YELLOW}█{ANSI_CYAN}█{ANSI_END}
 {ANSI_CYAN}{ANSI_BOLD}█████
