@@ -1,86 +1,103 @@
 # Generátor QR Kódov "Pay By Square" (SK)
 
-Pokročilý Python skript na generovanie platobných QR kódov podľa slovenského štandardu "Pay By Square".
+Jednoduchý a pokročilý program na generovanie platobných QR kódov podľa slovenského štandardu "Pay By Square".
 
-Program je navrhnutý na zjednodušenie úhrad vysokých faktúr. Ak celková suma presiahne 1000 €, program ju **automaticky rozdelí na viacero čiastkových platieb** (napr. 5562 € sa rozdelí na 5x 1000 € a 1x 562 €) a vygeneruje pre každú platbu samostatný QR kód.
+Program je navrhnutý primárne na zjednodušenie úhrad vysokých faktúr. Ak celková suma presiahne 1000 €, program ju **automaticky rozdelí na viacero čiastkových platieb** (napr. 5562 € sa rozdelí na 5x 1000 € a 1x 562 €) a vygeneruje pre každú platbu samostatný QR kód. Výsledkom je jeden PDF súbor, ktorý obsahuje všetky QR kódy pekne pod sebou.
 
-Výsledkom je jeden PDF súbor, ktorý obsahuje všetky QR kódy pekne pod sebou, vrátane čitateľného popisu ku každému z nich.
+## ✨ Kľúčové vlastnosti
+* **Automatické delenie sumy:** Platby nad 1000 € sa automaticky rozdelia na viacero QR kódov.
+* **Generovanie PDF:** Všetky QR kódy sa vygenerujú do jedného, prehľadného PDF súboru.
+* **Čitateľné popisky:** Každý QR kód v PDF má pri sebe popis (Odberateľ, Suma, VS) a poradové číslo.
+* **Štandard "Pay By Square":** Využíva oficiálny štandard pre slovenské bankové aplikácie.
 
-## Kľúčové vlastnosti
+---
 
-  * **Automatické delenie sumy:** Platby nad 1000 € sa automaticky rozdelia na viacero QR kódov, aby sa predišlo limitom v bankových aplikáciách.
-  * **Generovanie PDF:** Všetky QR kódy sa vygenerujú do jedného, prehľadného PDF súboru, pripraveného na tlač alebo digitálne použitie.
-  * **Čitateľné popisky:** Každý QR kód v PDF má pri sebe popis (Odberateľ, Suma, VS) a poradové číslo (napr. "Platba 1/6").
-  * **Štandard "Pay By Square":** Využíva knižnicu `bysquare` na korektné vytvorenie dátového reťazca (LZMA kompresia, Base32hex, CRC32).
-  * **Assety:** Využíva vlastný font (`arial.ttf`) pre konzistentný vzhľad textu.
+## 📥 Stiahnutie a spustenie (Pre bežných používateľov)
 
-## Požiadavky
+Ak si chcete program iba spustiť a nechcete inštalovať programovacie prostredie, postupujte takto:
 
-  * Python 3.x
-  * Knižnice uvedené v `requirements.txt` (primárne `bysquare`, `qrcode`, `pillow`, `reportlab`)
+1. Na pravej strane tejto stránky nájdite sekciu **Releases**.
+2. Kliknite na najnovšiu verziu (napr. `v1.1.9`).
+3. V sekcii *Assets* (úplne dole) si stiahnite súbor **`moj_qr_generator.exe`**.
+4. Stiahnutý súbor si presuňte do priečinka, kde ho chcete mať (napr. na Plochu) a jednoducho ho spustite dvojklikom.
 
-*(Poznámka: Ak generujete PDF, pravdepodobne používate knižnicu ako `reportlab`. Ak áno, nezabudnite ju pridať do `requirements.txt`\!)*
+---
 
-## Zoznam platobných partnerov
+## 📋 Nastavenie zoznamu platobných partnerov
 
-Aby program fungoval, musíte si pripraviť textový súbor so zoznamom ľudí alebo firiem, ktorým budete generovať QR kódy. 
+Aby program vedel, komu idete platiť, musíte si pripraviť jednoduchý textový súbor s vašimi kontaktmi.
 
-1. Vytvorte si obyčajný textový súbor (napr. `partneri.txt`) podľa priloženého vzoru `partneri_vzor.txt`.
-2. Každého partnera uveďte na nový riadok v tomto formáte:
-   `Názov ; IBAN ; ; Skrátený Názov` 
-   *(Napríklad: `Jozef Mrkvička ; SK9876543210987654321098 ; ; Jozef (skrátene)`)*
-3. Pri prvom spustení si program od vás vyžiada cestu k tomuto súboru.
-4. Cesta sa automaticky uloží do skrytého súboru `config.json`, takže ju nebudete musieť zadávať znova.
+### 1. Vytvorenie súboru
+Vytvorte si obyčajný textový súbor, napríklad `partneri.txt` (môžete použiť Poznámkový blok / Notepad).
+Každého partnera alebo firmu uveďte na nový riadok presne v tomto formáte:
+`Názov (oficiálny) ; IBAN ; ; Skrátený Názov`
 
-## Inštalácia a spustenie
+**Príklad obsahu súboru:**
+```text
+# Toto je zoznam mojich platobných partnerov
+Jozef Mrkvička ; SK9876543210987654321098 ; ; Jozef (skrátene)
+Firma Alfa s.r.o. ; SK1122334455667788990011 ; ; Alfa sro
+```
 
-Postupujte podľa týchto krokov na spustenie programu vo vašom lokálnom prostredí.
+### 2. Vloženie cesty k súboru do programu
+Pri prvom spustení programu sa vás čierne okno (konzola) opýta na **cestu k tomuto súboru**. 
+
+Máte dve možnosti, ako ju tam zadať:
+* **💡 Najjednoduchší spôsob:** Jednoducho chyťte váš vytvorený súbor `partneri.txt` myšou a presuňte (drag & drop) ho priamo do čierneho okna programu. Cesta sa tam sama vypíše a stačí stlačiť Enter.
+* **Ručné zadanie cesty:** Skopírujte celú cestu k súboru. Na systéme Windows vyzerá takáto absolútna cesta napríklad takto:
+  `C:\Users\MenoPouzivatela\Documents\partneri.txt`
+  alebo
+  `C:\Users\MenoPouzivatela\Desktop\Zmluvy\partneri.txt`
+
+Program si túto cestu zapamätá a pri ďalšom spustení ju už od vás pýtať nebude.
+
+---
+
+## 💻 Pre vývojárov: Inštalácia zo zdrojového kódu
+
+Ak si chcete kód upravovať alebo ho spúšťať priamo cez Python:
 
 **1. Klonujte alebo stiahnite repozitár**
-
 ```bash
-# Ak máte Git
-git clone https://github.com/VASE-MENO/moj_qr_generator.git
+git clone [https://github.com/jurzon/moj_qr_generator.git](https://github.com/jurzon/moj_qr_generator.git)
 cd moj_qr_generator
 ```
 
-*(Ak Git nemáte, jednoducho stiahnite projekt ako ZIP a rozbaľte ho.)*
-
 **2. Vytvorte a aktivujte virtuálne prostredie**
-
-Je silne odporúčané používať virtuálne prostredie (`.venv`), aby sa knižnice neinštalovali globálne.
-
 ```bash
-# Vytvorenie .venv (Windows)
 python -m venv .venv
-
-# Aktivácia .venv (Windows)
 .\.venv\Scripts\activate
 ```
 
 **3. Nainštalujte potrebné knižnice**
-
-Pomocou súboru `requirements.txt` nainštalujete všetky potrebné závislosti naraz.
-
 ```bash
 pip install -r requirements.txt
 ```
 
 **4. Spustite program**
-
-Program sa spustí vykonaním skriptu `main.py` v priečinku `src/`.
-
 ```bash
 python src/main.py
 ```
 
-## Ako program funguje
+---
 
-Po spustení skript `src/main.py` automaticky vykoná nasledujúce kroky:
+## 📦 Pre vývojárov: Ako vydať novú verziu (Release)
 
-1.  **Získa vstup:** Opýta sa používateľa na údaje o platbe (IBAN, Celková suma, VS, Poznámka).
-2.  **Rozdelí sumu:** Skontroluje, či je celková suma vyššia ako 1000 €. Ak áno, vytvorí zoznam čiastkových súm (napr. `[1000, 1000, 562.00]`). Ak nie, zoznam bude obsahovať len jednu položku (napr. `[150.00]`).
-3.  **Generuje QR kódy:** Prejde týmto zoznamom súm a pre každú jednu vygeneruje platný "Pay By Square" reťazec a z neho QR kód.
-4.  **Pridá poradie:** K poznámke pre každú platbu pripojí poradové číslo (napr. "Faktúra X (Platba 1/3)").
-5.  **Vytvorí PDF:** Vytvorí PDF dokument, kam postupne vykreslí každý QR kód spolu s jeho popisom (Suma, VS, Odberateľ).
-6.  **Uloží súbor:** Finálny dokument uloží (napr. ako `vystupna_faktura.pdf`) a otvorí ho.
+Tento repozitár má nastavený automatizovaný proces (GitHub Actions Workflow). Keď upravíte kód a chcete používateľom ponúknuť nový `.exe` súbor na stiahnutie, postupujte takto:
+
+**1. Uložte a odošlite úpravy kódu na GitHub:**
+Týmto odošlete samotný kód do hlavnej vetvy repozitára.
+```bash
+git add .
+git commit -m "Popis úprav (napr. oprava chýb, preklad UI)"
+git push
+```
+
+**2. Vytvorte novú verziu (Tag) a odošlite ju:**
+Na spúšťanie procesu zostavenia (buildu) používame sémantické verzovanie (napr. posun z `v1.1.9` na `v1.2.0`). Týmto krokom poviete GitHubu, aby vygeneroval novú aplikáciu.
+```bash
+git tag v1.2.0
+git push origin v1.2.0
+```
+
+> *Hneď ako odošlete tag na GitHub (krok 2), server si ho všimne a na pozadí spustí skript `release.yml`. Automaticky nainštaluje Python, zabalí kód cez PyInstaller do `moj_qr_generator.exe` a vytvorí nový verejný Release vo vašom repozitári.*
