@@ -21,6 +21,17 @@ Výsledkom je jeden PDF súbor, ktorý obsahuje všetky QR kódy pekne pod sebou
 
 *(Poznámka: Ak generujete PDF, pravdepodobne používate knižnicu ako `reportlab`. Ak áno, nezabudnite ju pridať do `requirements.txt`\!)*
 
+## Zoznam platobných partnerov
+
+Aby program fungoval, musíte si pripraviť textový súbor so zoznamom ľudí alebo firiem, ktorým budete generovať QR kódy. 
+
+1. Vytvorte si obyčajný textový súbor (napr. `partneri.txt`) podľa priloženého vzoru `partneri_vzor.txt`.
+2. Každého partnera uveďte na nový riadok v tomto formáte:
+   `Názov ; IBAN ; ; Skrátený Názov` 
+   *(Napríklad: `Jozef Mrkvička ; SK9876543210987654321098 ; ; Jozef (skrátene)`)*
+3. Pri prvom spustení si program od vás vyžiada cestu k tomuto súboru.
+4. Cesta sa automaticky uloží do skrytého súboru `config.json`, takže ju nebudete musieť zadávať znova.
+
 ## Inštalácia a spustenie
 
 Postupujte podľa týchto krokov na spustenie programu vo vašom lokálnom prostredí.
